@@ -1,0 +1,8 @@
+fragment User on HerreUser {
+  id
+  username
+  email
+  profile {
+    avatar
+  }
+}

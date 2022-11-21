@@ -1,0 +1,5 @@
+fragment Scope on Scope {
+  value
+  label
+  description
+}
