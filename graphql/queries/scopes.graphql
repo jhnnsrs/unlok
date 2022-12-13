@@ -11,7 +11,8 @@ query aget_scope($id: String!) {
 }
 
 query search_scopes($search: String) {
-  scopes(search: $search) {
-    ...Scope
+  options: scopes(search: $search) {
+    value
+    label
   }
 }

@@ -7,8 +7,8 @@ from unlok.api.schema import ScopeFragment, Search_scopesQuery, aaget_scope
 
 
 try:
-    from arkitekt.structures.default import get_default_structure_registry
-    from arkitekt.widgets import SearchWidget
+    from rekuest.structures.default import get_default_structure_registry
+    from rekuest.widgets import SearchWidget
 
     structure_reg = get_default_structure_registry()
     structure_reg.register_as_structure(
@@ -16,7 +16,7 @@ try:
         identifier="@lok/scope",
         expand=aaget_scope,
         shrink=lambda x: x.key,
-        default_widget=SearchWidget(query=Search_scopesQuery.Meta.document),
+        default_widget=SearchWidget(query=Search_scopesQuery.Meta.document, ward="lok"),
     )
 
 except ImportError:

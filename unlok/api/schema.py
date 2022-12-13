@@ -1,9 +1,9 @@
-from unlok.funcs import execute, aexecute
-from typing import Literal, List, Optional
-from rath.scalars import ID
 from pydantic import BaseModel, Field
+from typing import Optional, List, Tuple, Literal
 from enum import Enum
 from unlok.rath import UnlokRath
+from unlok.funcs import execute, aexecute
+from rath.scalars import ID
 
 
 class ApplicationClientType(str, Enum):
@@ -95,16 +95,13 @@ class UserFragment(BaseModel):
 
 
 class Get_scopesQuery(BaseModel):
-    scopes: Optional[List[Optional[ScopeFragment]]]
+    scopes: Optional[Tuple[Optional[ScopeFragment], ...]]
 
     class Arguments(BaseModel):
         pass
 
     class Meta:
         document = "fragment Scope on Scope {\n  value\n  label\n  description\n}\n\nquery get_scopes {\n  scopes {\n    ...Scope\n  }\n}"
-
-    class Config:
-        frozen = True
 
 
 class Aget_scopeQuery(BaseModel):
@@ -116,21 +113,24 @@ class Aget_scopeQuery(BaseModel):
     class Meta:
         document = "fragment Scope on Scope {\n  value\n  label\n  description\n}\n\nquery aget_scope($id: String!) {\n  scope(key: $id) {\n    ...Scope\n  }\n}"
 
+
+class Search_scopesQueryOptions(BaseModel):
+    typename: Optional[Literal["Scope"]] = Field(alias="__typename")
+    value: str
+    label: str
+
     class Config:
         frozen = True
 
 
 class Search_scopesQuery(BaseModel):
-    scopes: Optional[List[Optional[ScopeFragment]]]
+    options: Optional[Tuple[Optional[Search_scopesQueryOptions], ...]]
 
     class Arguments(BaseModel):
         search: Optional[str] = None
 
     class Meta:
-        document = "fragment Scope on Scope {\n  value\n  label\n  description\n}\n\nquery search_scopes($search: String) {\n  scopes(search: $search) {\n    ...Scope\n  }\n}"
-
-    class Config:
-        frozen = True
+        document = "query search_scopes($search: String) {\n  options: scopes(search: $search) {\n    value\n    label\n  }\n}"
 
 
 class MeQuery(BaseModel):
@@ -141,9 +141,6 @@ class MeQuery(BaseModel):
 
     class Meta:
         document = "fragment User on HerreUser {\n  id\n  username\n  email\n  profile {\n    avatar\n  }\n}\n\nquery me {\n  me {\n    ...User\n  }\n}"
-
-    class Config:
-        frozen = True
 
 
 async def aget_scopes(
@@ -204,7 +201,7 @@ def aget_scope(id: str, rath: UnlokRath = None) -> Optional[ScopeFragment]:
 
 async def asearch_scopes(
     search: Optional[str] = None, rath: UnlokRath = None
-) -> Optional[List[Optional[ScopeFragment]]]:
+) -> Optional[List[Optional[Search_scopesQueryOptions]]]:
     """search_scopes
 
 
@@ -214,13 +211,13 @@ async def asearch_scopes(
         rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
 
     Returns:
-        Optional[List[Optional[ScopeFragment]]]"""
+        Optional[List[Optional[Search_scopesQueryScopes]]]"""
     return (await aexecute(Search_scopesQuery, {"search": search}, rath=rath)).scopes
 
 
 def search_scopes(
     search: Optional[str] = None, rath: UnlokRath = None
-) -> Optional[List[Optional[ScopeFragment]]]:
+) -> Optional[List[Optional[Search_scopesQueryOptions]]]:
     """search_scopes
 
 
@@ -230,7 +227,7 @@ def search_scopes(
         rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
 
     Returns:
-        Optional[List[Optional[ScopeFragment]]]"""
+        Optional[List[Optional[Search_scopesQueryScopes]]]"""
     return execute(Search_scopesQuery, {"search": search}, rath=rath).scopes
 
 
