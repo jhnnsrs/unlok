@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List, Tuple, Literal
+from typing import Literal, List, Tuple, Optional
+from rath.scalars import ID
+from unlok.funcs import aexecute, execute
+from pydantic import Field, BaseModel
 from enum import Enum
 from unlok.rath import UnlokRath
-from unlok.funcs import execute, aexecute
-from rath.scalars import ID
 
 
 class ApplicationClientType(str, Enum):
