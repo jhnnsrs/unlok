@@ -10,4 +10,3 @@ class Unlok(Composition):
 
     def _repr_html_inline_(self):
         return f"<table><tr><td>rath</td><td>{self.rath._repr_html_inline_()}</td></tr></table>"
-

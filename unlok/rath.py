@@ -1,24 +1,21 @@
-from graphql import OperationType
-from pydantic import Field
-from rath import rath
 import contextvars
 import logging
 
-from rath.links.base import TerminatingLink
+from pydantic import Field
+
+from graphql import OperationType
+from rath import rath
 from rath.contrib.fakts.links.aiohttp import FaktsAIOHttpLink
 from rath.contrib.fakts.links.websocket import FaktsWebsocketLink
 from rath.contrib.herre.links.auth import HerreAuthLink
 from rath.links.aiohttp import AIOHttpLink
 from rath.links.auth import AuthTokenLink
-
 from rath.links.base import TerminatingLink
-from rath.links.compose import compose
+from rath.links.compose import TypedComposedLink, compose
 from rath.links.dictinglink import DictingLink
 from rath.links.shrink import ShrinkingLink
 from rath.links.split import SplitLink
 from rath.links.websockets import WebSocketLink
-from rath.links.compose import TypedComposedLink, compose
-
 
 current_unlok_rath = contextvars.ContextVar("current_unlok_rath")
 
@@ -26,11 +23,10 @@ current_unlok_rath = contextvars.ContextVar("current_unlok_rath")
 class UnlokLinkComposition(TypedComposedLink):
     dicting: DictingLink = Field(default_factory=DictingLink)
     auth: AuthTokenLink
-    split: SplitLink
+    split: AIOHttpLink
 
     def _repr_html_inline_(self):
         return f"<table><tr><td>refresh attempts</td><td>{self.auth.maximum_refresh_attempts}</td></tr></table>"
-
 
 
 class UnlokRath(rath.Rath):

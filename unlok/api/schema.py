@@ -1,8 +1,8 @@
-from typing import Literal, List, Tuple, Optional
+from enum import Enum
+from pydantic import BaseModel, Field
+from typing import List, Literal, Tuple, Optional
 from rath.scalars import ID
 from unlok.funcs import aexecute, execute
-from pydantic import Field, BaseModel
-from enum import Enum
 from unlok.rath import UnlokRath
 
 
@@ -65,7 +65,7 @@ class PublicFaktType(str, Enum):
 
 
 class ScopeFragment(BaseModel):
-    typename: Optional[Literal["Scope"]] = Field(alias="__typename")
+    typename: Optional[Literal["Scope"]] = Field(alias="__typename", exclude=True)
     value: str
     label: str
     description: Optional[str]
@@ -75,7 +75,7 @@ class ScopeFragment(BaseModel):
 
 
 class UserFragmentProfile(BaseModel):
-    typename: Optional[Literal["Profile"]] = Field(alias="__typename")
+    typename: Optional[Literal["Profile"]] = Field(alias="__typename", exclude=True)
     avatar: Optional[str]
 
     class Config:
@@ -83,7 +83,7 @@ class UserFragmentProfile(BaseModel):
 
 
 class UserFragment(BaseModel):
-    typename: Optional[Literal["HerreUser"]] = Field(alias="__typename")
+    typename: Optional[Literal["HerreUser"]] = Field(alias="__typename", exclude=True)
     id: ID
     username: str
     "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
@@ -92,6 +92,99 @@ class UserFragment(BaseModel):
 
     class Config:
         frozen = True
+
+
+class CreateChannelMutationCreatechannel(BaseModel):
+    typename: Optional[Literal["Channel"]] = Field(alias="__typename", exclude=True)
+    id: ID
+    name: Optional[str]
+    token: Optional[str]
+
+    class Config:
+        frozen = True
+
+
+class CreateChannelMutation(BaseModel):
+    create_channel: Optional[CreateChannelMutationCreatechannel] = Field(
+        alias="createChannel"
+    )
+
+    class Arguments(BaseModel):
+        name: str
+        token: str
+
+    class Meta:
+        document = "mutation CreateChannel($name: String!, $token: String!) {\n  createChannel(name: $name, token: $token) {\n    id\n    name\n    token\n  }\n}"
+
+
+class PublishToChannelMutationPublishtochannelChannel(BaseModel):
+    typename: Optional[Literal["Channel"]] = Field(alias="__typename", exclude=True)
+    id: ID
+    name: Optional[str]
+    token: Optional[str]
+
+    class Config:
+        frozen = True
+
+
+class PublishToChannelMutationPublishtochannel(BaseModel):
+    typename: Optional[Literal["PublishResult"]] = Field(
+        alias="__typename", exclude=True
+    )
+    status: Optional[str]
+    channel: Optional[PublishToChannelMutationPublishtochannelChannel]
+
+    class Config:
+        frozen = True
+
+
+class PublishToChannelMutation(BaseModel):
+    publish_to_channel: Optional[PublishToChannelMutationPublishtochannel] = Field(
+        alias="publishToChannel"
+    )
+
+    class Arguments(BaseModel):
+        channel: ID
+        message: str
+        title: str
+
+    class Meta:
+        document = "mutation PublishToChannel($channel: ID!, $message: String!, $title: String!) {\n  publishToChannel(channel: $channel, message: $message, title: $title) {\n    status\n    channel {\n      id\n      name\n      token\n    }\n  }\n}"
+
+
+class NotifyUserMutationNotifyuserChannel(BaseModel):
+    typename: Optional[Literal["Channel"]] = Field(alias="__typename", exclude=True)
+    id: ID
+    name: Optional[str]
+    token: Optional[str]
+
+    class Config:
+        frozen = True
+
+
+class NotifyUserMutationNotifyuser(BaseModel):
+    typename: Optional[Literal["PublishResult"]] = Field(
+        alias="__typename", exclude=True
+    )
+    status: Optional[str]
+    channel: Optional[NotifyUserMutationNotifyuserChannel]
+
+    class Config:
+        frozen = True
+
+
+class NotifyUserMutation(BaseModel):
+    notify_user: Optional[Tuple[Optional[NotifyUserMutationNotifyuser], ...]] = Field(
+        alias="notifyUser"
+    )
+
+    class Arguments(BaseModel):
+        user: ID
+        message: str
+        title: str
+
+    class Meta:
+        document = "mutation NotifyUser($user: ID!, $message: String!, $title: String!) {\n  notifyUser(user: $user, message: $message, title: $title) {\n    status\n    channel {\n      id\n      name\n      token\n    }\n  }\n}"
 
 
 class Get_scopesQuery(BaseModel):
@@ -115,7 +208,7 @@ class Aget_scopeQuery(BaseModel):
 
 
 class Search_scopesQueryOptions(BaseModel):
-    typename: Optional[Literal["Scope"]] = Field(alias="__typename")
+    typename: Optional[Literal["Scope"]] = Field(alias="__typename", exclude=True)
     value: str
     label: str
 
@@ -127,10 +220,11 @@ class Search_scopesQuery(BaseModel):
     options: Optional[Tuple[Optional[Search_scopesQueryOptions], ...]]
 
     class Arguments(BaseModel):
-        search: Optional[str] = None
+        search: Optional[str]
+        values: Optional[List[Optional[ID]]]
 
     class Meta:
-        document = "query search_scopes($search: String) {\n  options: scopes(search: $search) {\n    value\n    label\n  }\n}"
+        document = "query search_scopes($search: String, $values: [ID]) {\n  options: scopes(search: $search, values: $values) {\n    value\n    label\n  }\n}"
 
 
 class MeQuery(BaseModel):
@@ -141,6 +235,136 @@ class MeQuery(BaseModel):
 
     class Meta:
         document = "fragment User on HerreUser {\n  id\n  username\n  email\n  profile {\n    avatar\n  }\n}\n\nquery me {\n  me {\n    ...User\n  }\n}"
+
+
+async def acreate_channel(
+    name: str, token: str, rath: UnlokRath = None
+) -> Optional[CreateChannelMutationCreatechannel]:
+    """CreateChannel
+
+
+
+    Arguments:
+        name (str): name
+        token (str): token
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[CreateChannelMutationCreatechannel]"""
+    return (
+        await aexecute(CreateChannelMutation, {"name": name, "token": token}, rath=rath)
+    ).create_channel
+
+
+def create_channel(
+    name: str, token: str, rath: UnlokRath = None
+) -> Optional[CreateChannelMutationCreatechannel]:
+    """CreateChannel
+
+
+
+    Arguments:
+        name (str): name
+        token (str): token
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[CreateChannelMutationCreatechannel]"""
+    return execute(
+        CreateChannelMutation, {"name": name, "token": token}, rath=rath
+    ).create_channel
+
+
+async def apublish_to_channel(
+    channel: ID, message: str, title: str, rath: UnlokRath = None
+) -> Optional[PublishToChannelMutationPublishtochannel]:
+    """PublishToChannel
+
+
+
+    Arguments:
+        channel (ID): channel
+        message (str): message
+        title (str): title
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[PublishToChannelMutationPublishtochannel]"""
+    return (
+        await aexecute(
+            PublishToChannelMutation,
+            {"channel": channel, "message": message, "title": title},
+            rath=rath,
+        )
+    ).publish_to_channel
+
+
+def publish_to_channel(
+    channel: ID, message: str, title: str, rath: UnlokRath = None
+) -> Optional[PublishToChannelMutationPublishtochannel]:
+    """PublishToChannel
+
+
+
+    Arguments:
+        channel (ID): channel
+        message (str): message
+        title (str): title
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[PublishToChannelMutationPublishtochannel]"""
+    return execute(
+        PublishToChannelMutation,
+        {"channel": channel, "message": message, "title": title},
+        rath=rath,
+    ).publish_to_channel
+
+
+async def anotify_user(
+    user: ID, message: str, title: str, rath: UnlokRath = None
+) -> Optional[List[Optional[NotifyUserMutationNotifyuser]]]:
+    """NotifyUser
+
+
+
+    Arguments:
+        user (ID): user
+        message (str): message
+        title (str): title
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[List[Optional[NotifyUserMutationNotifyuser]]]"""
+    return (
+        await aexecute(
+            NotifyUserMutation,
+            {"user": user, "message": message, "title": title},
+            rath=rath,
+        )
+    ).notify_user
+
+
+def notify_user(
+    user: ID, message: str, title: str, rath: UnlokRath = None
+) -> Optional[List[Optional[NotifyUserMutationNotifyuser]]]:
+    """NotifyUser
+
+
+
+    Arguments:
+        user (ID): user
+        message (str): message
+        title (str): title
+        rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
+
+    Returns:
+        Optional[List[Optional[NotifyUserMutationNotifyuser]]]"""
+    return execute(
+        NotifyUserMutation,
+        {"user": user, "message": message, "title": title},
+        rath=rath,
+    ).notify_user
 
 
 async def aget_scopes(
@@ -200,7 +424,9 @@ def aget_scope(id: str, rath: UnlokRath = None) -> Optional[ScopeFragment]:
 
 
 async def asearch_scopes(
-    search: Optional[str] = None, rath: UnlokRath = None
+    search: Optional[str] = None,
+    values: Optional[List[Optional[ID]]] = None,
+    rath: UnlokRath = None,
 ) -> Optional[List[Optional[Search_scopesQueryOptions]]]:
     """search_scopes
 
@@ -208,15 +434,22 @@ async def asearch_scopes(
 
     Arguments:
         search (Optional[str], optional): search.
+        values (Optional[List[Optional[ID]]], optional): values.
         rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
 
     Returns:
         Optional[List[Optional[Search_scopesQueryScopes]]]"""
-    return (await aexecute(Search_scopesQuery, {"search": search}, rath=rath)).scopes
+    return (
+        await aexecute(
+            Search_scopesQuery, {"search": search, "values": values}, rath=rath
+        )
+    ).scopes
 
 
 def search_scopes(
-    search: Optional[str] = None, rath: UnlokRath = None
+    search: Optional[str] = None,
+    values: Optional[List[Optional[ID]]] = None,
+    rath: UnlokRath = None,
 ) -> Optional[List[Optional[Search_scopesQueryOptions]]]:
     """search_scopes
 
@@ -224,11 +457,14 @@ def search_scopes(
 
     Arguments:
         search (Optional[str], optional): search.
+        values (Optional[List[Optional[ID]]], optional): values.
         rath (unlok.rath.UnlokRath, optional): The client we want to use (defaults to the currently active client)
 
     Returns:
         Optional[List[Optional[Search_scopesQueryScopes]]]"""
-    return execute(Search_scopesQuery, {"search": search}, rath=rath).scopes
+    return execute(
+        Search_scopesQuery, {"search": search, "values": values}, rath=rath
+    ).scopes
 
 
 async def ame(rath: UnlokRath = None) -> Optional[UserFragment]:

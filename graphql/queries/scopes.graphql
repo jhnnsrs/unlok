@@ -10,8 +10,8 @@ query aget_scope($id: String!) {
   }
 }
 
-query search_scopes($search: String) {
-  options: scopes(search: $search) {
+query search_scopes($search: String, $values: [ID]) {
+  options: scopes(search: $search, values: $values) {
     value
     label
   }
