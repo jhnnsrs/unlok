@@ -1,8 +1,8 @@
-from enum import Enum
+from typing import Optional, List, Tuple, Literal
+from unlok.funcs import execute, aexecute
 from pydantic import BaseModel, Field
-from typing import List, Literal, Tuple, Optional
 from rath.scalars import ID
-from unlok.funcs import aexecute, execute
+from enum import Enum
 from unlok.rath import UnlokRath
 
 
@@ -41,7 +41,7 @@ class ApplicationAlgorithm(str, Enum):
     "HMAC with SHA-2 256"
 
 
-class FaktApplicationKind(str, Enum):
+class ClientKind(str, Enum):
     """An enumeration."""
 
     WEBSITE = "WEBSITE"
@@ -50,6 +50,22 @@ class FaktApplicationKind(str, Enum):
     "Dekstop"
     USER = "USER"
     "User"
+
+
+class FilterMethod(str, Enum):
+    HOST_REGEX = "HOST_REGEX"
+    HOST_IS = "HOST_IS"
+    HOST_IS_NOT = "HOST_IS_NOT"
+    PORT_IS = "PORT_IS"
+    PORT_IS_NOT = "PORT_IS_NOT"
+    VERSION_IS = "VERSION_IS"
+    VERSION_IS_NOT = "VERSION_IS_NOT"
+    VERSION_REGEX = "VERSION_REGEX"
+    IDENTIFIER_IS = "IDENTIFIER_IS"
+    IDENTIFIER_IS_NOT = "IDENTIFIER_IS_NOT"
+    IDENTIFIER_REGEX = "IDENTIFIER_REGEX"
+    USER_IS = "USER_IS"
+    USER_IS_DEVELOPER = "USER_IS_DEVELOPER"
 
 
 class GrantType(str, Enum):
@@ -62,6 +78,16 @@ class GrantType(str, Enum):
 class PublicFaktType(str, Enum):
     DEKSTOP = "DEKSTOP"
     WEBSITE = "WEBSITE"
+
+
+class FilterInput(BaseModel):
+    method: FilterMethod
+    value: str
+
+    class Config:
+        frozen = True
+        extra = "forbid"
+        use_enum_values = True
 
 
 class ScopeFragment(BaseModel):
