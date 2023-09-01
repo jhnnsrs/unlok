@@ -1,9 +1,9 @@
-from typing import Optional, List, Tuple, Literal
-from unlok.funcs import execute, aexecute
+from typing import Literal, Tuple, List, Optional
 from pydantic import BaseModel, Field
 from rath.scalars import ID
-from enum import Enum
 from unlok.rath import UnlokRath
+from unlok.funcs import aexecute, execute
+from enum import Enum
 
 
 class ApplicationClientType(str, Enum):
@@ -246,8 +246,8 @@ class Search_scopesQuery(BaseModel):
     options: Optional[Tuple[Optional[Search_scopesQueryOptions], ...]]
 
     class Arguments(BaseModel):
-        search: Optional[str]
-        values: Optional[List[Optional[ID]]]
+        search: Optional[str] = Field(default=None)
+        values: Optional[List[Optional[ID]]] = Field(default=None)
 
     class Meta:
         document = "query search_scopes($search: String, $values: [ID]) {\n  options: scopes(search: $search, values: $values) {\n    value\n    label\n  }\n}"

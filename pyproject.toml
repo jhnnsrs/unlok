@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "unlok"
-version = "0.1.15"
+version = "0.1.19"
 description = ""
 authors = ["jhnnsrs <jhnnsrs@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-rath = ">=0.3.3"
-koil = ">=0.2.10"
+rath = ">=0.4.6"
 
 
 [tool.poetry.group.dev.dependencies]
