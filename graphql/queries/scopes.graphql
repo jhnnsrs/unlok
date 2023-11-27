@@ -1,0 +1,18 @@
+query get_scopes {
+  scopes {
+    ...Scope
+  }
+}
+
+query aget_scope($id: String!) {
+  scope(key: $id) {
+    ...Scope
+  }
+}
+
+query search_scopes($search: String, $values: [ID]) {
+  options: scopes(search: $search, values: $values) {
+    value
+    label
+  }
+}
